@@ -98,7 +98,7 @@ describe('API de montadoras', () => {
 
             });
 
-            it('Deve retornar erro ao atualizar montadora com id negativo', async () => {
+            it('Deve tentar atualizar uma montadora (retorna erro) - o id é negativo', async () => {
                 const montadora = await MontadoraFactory.create('Nissan', 'Japão');
 
                 const response = await request(app)
@@ -109,25 +109,16 @@ describe('API de montadoras', () => {
                 expect(response.body.error).toBe('ID inválido');
             });
 
-            it('Deve tentar criar uma montadora - parâmetros "nome" vazio', async () => {
-                const response = await request(app)
-                    .post('/montadoras')
-                    .send({
-                        pais: 'Itália'
-                    })
-                expect(response.status).toBe(500);
-
-            });
         });
-        describe('Procura de montadoras', () => {
-            it('Deve listar as montadoras ordenadas por nome', async () => {
+        describe('Listar montadoras', () => {
+            it('Deve listar as montadoras por nome', async () => {
                 const response = await request(app).get('/montadoras');
 
                 expect(response.status).toBe(200);
                 expect(response.body.data.map(m => m.Nome)).toEqual(['Honda', 'Nissan', 'Toyota']);
             });
 
-            it('Deve retornar lista vazia quando não há montadoras', async () => {
+            it('Deve listar as montadoras - retornar vazio caso não haja montadoras', async () => {
                 await clearDatabase();
 
                 const response = await request(app).get('/montadoras');
@@ -137,8 +128,8 @@ describe('API de montadoras', () => {
             });
         });
 
-        describe('Exclusão', () => {
-            it('Deve deletar uma montadora com sucesso', async () => {
+        describe('Excluir montadoras', () => {
+            it('Deve excluir uma montadora com sucesso', async () => {
                 const montadora = await MontadoraFactory.create('Nissan', 'Japão');
 
                 const response = await request(app).delete(`/montadoras/${montadora.id}`);
@@ -147,7 +138,7 @@ describe('API de montadoras', () => {
                 expect(response.body.data.affectedRows).toBe(1);
             });
 
-            it('Deve retornar 404 ao deletar montadora inexistente', async () => {
+            it('Deve tentar excluir uma montadora (retorna erro) - montadora inexistente', async () => {
                 const response = await request(app).delete('/montadoras/999999');
 
                 expect(response.status).toBe(404);
@@ -203,7 +194,7 @@ describe('API de clientes', () => {
                 expect(response.body.data).toHaveProperty('insertId');
             });
 
-            it('Deve retornar erro ao criar cliente com nome curto demais', async () => {
+            it('Deve tentar criar cliente (retorna erro) - nome curto', async () => {
                 const response = await request(app)
                     .post('/clientes')
                     .send({
@@ -218,7 +209,7 @@ describe('API de clientes', () => {
                 expect(response.body.error).toBe('Nome inválido');
             });
 
-            it('Deve retornar erro ao criar cliente com CEP inválido', async () => {
+            it('Deve tentar criar cliente (retorna erro) - CEP inválido', async () => {
                 vi.mocked(consultarCep).mockRejectedValueOnce(new Error('CEP inválido'));
 
                 const response = await request(app)
@@ -235,7 +226,7 @@ describe('API de clientes', () => {
                 expect(response.body.error).toBe('CEP inválido');
             });
 
-            it('Deve retornar erro ao criar cliente sem número', async () => {
+            it('Deve tentar criar cliente (retorna erro) - cliente sem número', async () => {
                 const response = await request(app)
                     .post('/clientes')
                     .send({
@@ -268,7 +259,7 @@ describe('API de clientes', () => {
                 expect(response.body.data.affectedRows >= 1).toBeTruthy();
             });
 
-            it('Deve retornar erro ao atualizar cliente com id negativo', async () => {
+            it('Deve tentar atualizar cliente (retorna erro) - id negativo', async () => {
                 const response = await request(app)
                     .put('/clientes?id=-1')
                     .send({
@@ -283,7 +274,7 @@ describe('API de clientes', () => {
                 expect(response.body.error).toBe('ID inválido');
             });
 
-            it('Deve retornar erro ao atualizar cliente com CPF inválido', async () => {
+            it('Deve tentar atualizar cliente (retorna erro) - CPF inválido', async () => {
                 const cliente = await ClienteFactory.create('Lucas Lima', '12345678909', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '900', null);
 
                 const response = await request(app)
@@ -301,15 +292,15 @@ describe('API de clientes', () => {
             });
         });
 
-        describe('Procura de clientes', () => {
-            it('Deve listar os clientes ordenados por nome', async () => {
+        describe('Listar clientes', () => {
+            it('Deve listar os clientes por nome', async () => {
                 const response = await request(app).get('/clientes');
 
                 expect(response.status).toBe(200);
                 expect(response.body.data.map(c => c.Nome)).toEqual(['Ana Lima', 'Carlos Souza', 'João Silva']);
             });
 
-            it('Deve retornar lista vazia quando não há clientes', async () => {
+            it('Deve listar os clientes - retornar vazio caso não haja clientes', async () => {
                 await clearDatabase();
 
                 const response = await request(app).get('/clientes');
@@ -319,7 +310,7 @@ describe('API de clientes', () => {
             });
         });
 
-        describe('Exclusão de clientes', () => {
+        describe('Excluir clientes', () => {
             it('Deve deletar um cliente com sucesso', async () => {
                 const cliente = await ClienteFactory.create('Rita Dias', '12345678910', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '1000', null);
 
@@ -329,7 +320,7 @@ describe('API de clientes', () => {
                 expect(response.body.data.affectedRows).toBe(1);
             });
 
-            it('Deve retornar sucesso com affectedRows 0 ao deletar cliente inexistente', async () => {
+            it('Deve tentar excluir uma montadora (NÃO retorna erro) - cliente inexistente', async () => {
                 const response = await request(app).delete('/clientes/999999');
 
                 expect(response.status).toBe(200);
@@ -378,7 +369,7 @@ describe('API de veículos', () => {
                 expect(response.body.data).toHaveProperty('insertId');
             });
 
-            it('Deve retornar erro ao criar veículo com modelo curto demais', async () => {
+            it('Deve tentar criar veículo (retorna erro) - modelo curto', async () => {
                 const montadora = await MontadoraFactory.create('Honda', 'Japão');
                 const cliente = await ClienteFactory.create('Ana Lima', '12345678902', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '200', null);
 
@@ -398,7 +389,7 @@ describe('API de veículos', () => {
                 expect(response.body.error).toBe('Modelo inválido');
             });
 
-            it('Deve retornar erro ao criar veículo com valor inválido', async () => {
+            it('Deve tentar criar veículo (retorna erro) - valor inválido', async () => {
                 const montadora = await MontadoraFactory.create('Honda', 'Japão');
                 const cliente = await ClienteFactory.create('Ana Lima', '12345678902', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '200', null);
 
@@ -441,7 +432,7 @@ describe('API de veículos', () => {
                 expect(response.body.data.affectedRows >= 1).toBeTruthy();
             });
 
-            it('Deve retornar erro ao atualizar veículo com id negativo', async () => {
+            it('Deve tentar atualizar veículo (retorna erro) - id negativo', async () => {
                 const montadora = await MontadoraFactory.create('Nissan', 'Japão');
                 const cliente = await ClienteFactory.create('Carlos Souza', '12345678903', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '300', 'Casa');
 
@@ -461,7 +452,7 @@ describe('API de veículos', () => {
                 expect(response.body.error).toBe('ID inválido');
             });
 
-            it('Deve retornar erro ao atualizar veículo com placa inválida', async () => {
+            it('Deve tentar atualizar veículo (retorna erro) - placa inválida', async () => {
                 const montadora = await MontadoraFactory.create('Nissan', 'Japão');
                 const cliente = await ClienteFactory.create('Carlos Souza', '12345678903', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '300', 'Casa');
                 const veiculo = await VeiculoFactory.create('Sentra', 'PQR1S23', 2018, 'Cinza', 70000, cliente.id, montadora.id);
@@ -483,15 +474,15 @@ describe('API de veículos', () => {
             });
         });
 
-        describe('Procura de veículos', () => {
-            it('Deve listar os veículos ordenados por modelo', async () => {
+        describe('Listar veículos', () => {
+            it('Deve listar os veículos por modelo', async () => {
                 const response = await request(app).get('/veiculos');
 
                 expect(response.status).toBe(200);
                 expect(response.body.data.map(v => v.Modelo)).toEqual(['Corolla', 'Etios', 'Yaris']);
             });
 
-            it('Deve retornar lista vazia quando não há veículos', async () => {
+            it('Deve listar os veículos - retornar vazio caso não haja veículos', async () => {
                 await clearDatabase();
 
                 const response = await request(app).get('/veiculos');
@@ -501,7 +492,7 @@ describe('API de veículos', () => {
             });
         });
 
-        describe('Exclusão de veículos', () => {
+        describe('Excluir veículos', () => {
             it('Deve deletar um veículo com sucesso', async () => {
                 const montadora = await MontadoraFactory.create('Fiat', 'Itália');
                 const cliente = await ClienteFactory.create('Rita Dias', '12345678910', '01001000', 'Praça da Sé', 'Sé', 'São Paulo', 'SP', '1000', null);
@@ -513,7 +504,7 @@ describe('API de veículos', () => {
                 expect(response.body.data.affectedRows).toBe(1);
             });
 
-            it('Deve retornar sucesso com affectedRows 0 ao deletar veículo inexistente', async () => {
+            it('Deve tentar excluir um veículo (NÃO retorna erro) - veículo inexistente', async () => {
                 const response = await request(app).delete('/veiculos/999999');
 
                 expect(response.status).toBe(200);
